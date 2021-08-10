@@ -38,7 +38,7 @@ namespace aunit {
  * summary of the entire run at the end. In the future, it may be possible to
  * allow a different TestRunner to be used.
  */
-class TestRunner {
+class TestRunner : public ITestCaller {
   public:
     /**
      * Integer type of the timeout parameter. Seconds. Default is
@@ -47,7 +47,7 @@ class TestRunner {
     typedef uint16_t TimeoutType;
 
     /** Run all tests using the current runner. */
-    static void run() { getRunner()->runTest(); }
+    static void run(bool useColour) { getRunner()->runTest(useColour); }
 
     /** Print out the known tests. For debugging only. */
     static void list() { getRunner()->listTests(); }
@@ -114,6 +114,15 @@ class TestRunner {
       getRunner()->setRunnerTimeout(seconds);
     }
 
+    static bool gAllDone;
+    static int gFailedOrExpiredTestCount;
+
+    // ITestCaller
+    virtual uint16_t getCount() const { return mCount; }
+    virtual uint16_t getPassedCount() const { return mPassedCount; }
+    virtual uint16_t getFailedCount() const { return mFailedCount; }
+    virtual uint16_t getSkippedCount() const { return mSkippedCount; }
+    virtual uint16_t getExpiredCount() const { return mExpiredCount; }
   private:
     /** Default total timeout for the test runner. */
     static const TimeoutType kTimeoutDefault = 10;
@@ -135,7 +144,7 @@ class TestRunner {
     TestRunner();
 
     /** Run the current test case and print out the result. */
-    void runTest();
+    void runTest(bool useColour);
 
     /** Print out the known tests. For debugging only. */
     void listTests();
@@ -144,7 +153,7 @@ class TestRunner {
     void printStartRunner() const;
 
     /** Print out the summary of the entire test suite. */
-    void resolveRun() const;
+    void resolveRun(bool useColour) const;
 
     /** Perform any TestRunner initialization. */
     void setupRunner();

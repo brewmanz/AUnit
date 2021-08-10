@@ -59,7 +59,7 @@ void TestRunner::setLifeCycleMatchingPattern(const char* pattern,
     length++;
   }
 
-  for (Test** p = Test::getRoot(); *p != nullptr; p = (*p)->getNext()) {
+  for (Test** p = Test::getRoot(this); *p != nullptr; p = (*p)->getNext()) {
     if ((*p)->getName().compareToN(pattern, length) == 0) {
       (*p)->setLifeCycle(lifeCycle);
     }
@@ -83,7 +83,7 @@ void TestRunner::setLifeCycleMatchingPattern(const char* testClass,
 
 TestRunner::TestRunner() {}
 
-void TestRunner::runTest() {
+void TestRunner::runTest(bool useColour) {
   setupRunner();
 
   // Print initial header if this is the first run.
@@ -93,10 +93,10 @@ void TestRunner::runTest() {
   }
 
   // If no more test cases, then print out summary of run.
-  if (*Test::getRoot() == nullptr) {
+  if (*Test::getRoot(this) == nullptr) {
     if (!mIsResolved) {
       mEndTime = millis();
-      resolveRun();
+      resolveRun(useColour);
       mIsResolved = true;
     #if EPOXY_DUINO
       exit((mFailedCount || mExpiredCount) ? 1 : 0);
@@ -108,7 +108,7 @@ void TestRunner::runTest() {
   // If reached the end and there are still test cases left, start from the
   // beginning again.
   if (*mCurrent == nullptr) {
-    mCurrent = Test::getRoot();
+    mCurrent = Test::getRoot(this);
   }
 
   // Implement a finite state machine that calls the (*mCurrent)->setup() or
@@ -183,7 +183,7 @@ void TestRunner::runTest() {
       (*mCurrent)->setLifeCycle(Test::kLifeCycleFinished);
       break;
     case Test::kLifeCycleFinished:
-      (*mCurrent)->resolve();
+      (*mCurrent)->resolve(useColour);
       // skip to the next one by taking current test out of the list
       *mCurrent = *(*mCurrent)->getNext();
       break;
@@ -194,7 +194,7 @@ void TestRunner::setupRunner() {
   if (!mIsSetup) {
     mIsSetup = true;
     mCount = countTests();
-    mCurrent = Test::getRoot();
+    mCurrent = Test::getRoot(this);
     mStartTime = millis();
   }
 }
@@ -203,7 +203,7 @@ void TestRunner::setupRunner() {
 // another C++ static initialization ordering problem.
 uint16_t TestRunner::countTests() {
   uint16_t count = 0;
-  for (Test** p = Test::getRoot(); *p != nullptr; p = (*p)->getNext()) {
+  for (Test** p = Test::getRoot(nullptr); *p != nullptr; p = (*p)->getNext()) {
     count++;
   }
   return count;
@@ -237,7 +237,7 @@ void TestRunner::printStartRunner() const {
   printer->println(F(" test(s)."));
 }
 
-void TestRunner::resolveRun() const {
+void TestRunner::resolveRun(bool useColour) const {
   if (!isVerbosity(Verbosity::kTestRunSummary)) return;
   Print* printer = Printer::getPrinter();
 
@@ -247,17 +247,52 @@ void TestRunner::resolveRun() const {
   printer->println(" seconds.");
 
   printer->print(F("TestRunner summary: "));
-  printer->print(mPassedCount);
-  printer->print(F(" passed, "));
-  printer->print(mFailedCount);
-  printer->print(F(" failed, "));
-  printer->print(mSkippedCount);
-  printer->print(F(" skipped, "));
-  printer->print(mExpiredCount);
-  printer->print(F(" timed out, out of "));
+
+  if(useColour && mFailedCount == 0 && mExpiredCount == 0){
+    if(mSkippedCount) { printColourYellow(printer); } else { printColourGreen(printer); }
+    printer->print(mPassedCount);
+    printer->print(F(" passed, "));
+    printColourOff(printer);
+  } else {
+    printer->print(mPassedCount);
+    printer->print(F(" passed, "));
+  }
+
+  if(useColour && mFailedCount){
+    printColourRed(printer);
+    printer->print(mFailedCount);
+    printer->print(F(" failed, "));
+    printColourOff(printer);
+  } else {
+    printer->print(mFailedCount);
+    printer->print(F(" failed, "));
+  }
+
+  if(useColour && mSkippedCount){
+    printColourYellow(printer);
+    printer->print(mSkippedCount);
+    printer->print(F(" skipped, "));
+    printColourOff(printer);
+  } else {
+    printer->print(mSkippedCount);
+    printer->print(F(" skipped, "));
+  }
+
+  if(useColour && mExpiredCount){
+    printColourRed(printer);
+    printer->print(mExpiredCount);
+    printer->print(F(" timed out,"));
+    printColourOff(printer);
+  } else {
+    printer->print(mExpiredCount);
+    printer->print(F(" timed out,"));
+  }
+  printer->print(F(" out of "));
   printer->print(mCount);
   printer->println(F(" test(s)."));
-}
+
+  gFailedOrExpiredTestCount = mFailedCount + mExpiredCount;
+  gAllDone = true;}
 
 void TestRunner::listTests() {
   setupRunner();
@@ -265,7 +300,7 @@ void TestRunner::listTests() {
   Print* printer = Printer::getPrinter();
   printer->print(F("TestRunner test count: "));
   printer->println(mCount);
-  for (Test** p = Test::getRoot(); (*p) != nullptr; p = (*p)->getNext()) {
+  for (Test** p = Test::getRoot(this); (*p) != nullptr; p = (*p)->getNext()) {
     printer->print(F("Test "));
     (*p)->getName().print(printer);
     printer->print(F("; lifeCycle: "));
@@ -276,5 +311,6 @@ void TestRunner::listTests() {
 void TestRunner::setRunnerTimeout(TimeoutType timeout) {
   mTimeout = timeout;
 }
-
+bool TestRunner::gAllDone = false;
+int TestRunner::gFailedOrExpiredTestCount = 0;
 }

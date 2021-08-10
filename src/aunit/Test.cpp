@@ -31,10 +31,26 @@ SOFTWARE.
 
 namespace aunit {
 
+void printColourRed(Print* printer){
+  printer->print(F("\e[1;31m"));
+}
+void printColourYellow(Print* printer){
+  printer->print(F("\e[1;33m"));
+}
+void printColourGreen(Print* printer){
+  printer->print(F("\e[1;32m"));
+}
+void printColourOff(Print* printer){
+  printer->print(F("\e[m"));
+}
+
 // Use a static variable inside a function to solve the static initialization
 // ordering problem.
-Test** Test::getRoot() {
+Test** Test::getRoot(const ITestCaller* pTestCaller) {
   static Test* root;
+  if(pTestCaller){
+    mTestCaller = pTestCaller;
+  }
   return &root;
 }
 
@@ -61,7 +77,7 @@ void Test::setPassOrFail(bool ok) {
 // another static initialization ordering problem.
 void Test::insert() {
   // Find the element p whose p->next sorts after the current test
-  Test** p = getRoot();
+  Test** p = getRoot(mTestCaller);
   while (*p != nullptr) {
     if (getName().compareTo((*p)->getName()) < 0) break;
     p = &(*p)->mNext;
@@ -70,7 +86,7 @@ void Test::insert() {
   *p = this;
 }
 
-void Test::resolve() {
+void Test::resolve(bool useColour) {
   const __FlashStringHelper* const TEST_STRING = F("Test ");
 
   if (!isVerbosity(Verbosity::kTestAll)) return;
@@ -80,23 +96,34 @@ void Test::resolve() {
       && isVerbosity(Verbosity::kTestPassed)) {
     printer->print(TEST_STRING);
     mName.print(printer);
+    if(useColour){ printColourGreen(printer); }
     printer->println(F(" passed."));
+    if(useColour){ printColourOff(printer); }
   } else if (mStatus == Test::kStatusFailed
       && isVerbosity(Verbosity::kTestFailed)) {
     printer->print(TEST_STRING);
     mName.print(printer);
-    printer->println(F(" failed."));
+    if(useColour){ printColourRed(printer); }
+    printer->print(F(" failed#"));
+    printer->println(mTestCaller ? mTestCaller->getFailedCount() : -1 );
+    if(useColour){ printColourOff(printer); }
   } else if (mStatus == Test::kStatusSkipped
       && isVerbosity(Verbosity::kTestSkipped)) {
     printer->print(TEST_STRING);
     mName.print(printer);
+    if(useColour){ printColourYellow(printer); }
     printer->println(F(" skipped."));
+    if(useColour){ printColourOff(printer); }
   } else if (mStatus == Test::kStatusExpired
       && isVerbosity(Verbosity::kTestExpired)) {
     printer->print(TEST_STRING);
     mName.print(printer);
-    printer->println(F(" timed out."));
+    if(useColour){ printColourRed(printer); }
+    printer->println(F(" timed out!"));
+    if(useColour){ printColourOff(printer); }
   }
 }
+
+const ITestCaller* Test::mTestCaller = nullptr;
 
 }
