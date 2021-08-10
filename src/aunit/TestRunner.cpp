@@ -68,7 +68,7 @@ void TestRunner::setLifeCycleMatchingPattern(const char* pattern,
     length++;
   }
 
-  for (Test** p = Test::getRoot(); *p != nullptr; p = (*p)->getNext()) {
+  for (Test** p = Test::getRoot(this); *p != nullptr; p = (*p)->getNext()) {
     if ((*p)->getName().compareToN(pattern, length) == 0) {
       (*p)->setLifeCycle(lifeCycle);
     }
@@ -123,7 +123,7 @@ void TestRunner::excludeAll() {
 // another C++ static initialization ordering problem.
 uint16_t TestRunner::countTests() {
   uint16_t count = 0;
-  for (Test** p = Test::getRoot(); *p != nullptr; p = (*p)->getNext()) {
+  for (Test** p = Test::getRoot(nullptr); *p != nullptr; p = (*p)->getNext()) {
     count++;
   }
   return count;
@@ -157,7 +157,7 @@ void TestRunner::printStartRunner() const {
   printer->println(F(" test(s)."));
 }
 
-void TestRunner::resolveRun() const {
+void TestRunner::resolveRun(bool useColour) const {
   if (!isVerbosity(Verbosity::kTestRunSummary)) return;
   Print* printer = Printer::getPrinter();
 
@@ -167,17 +167,52 @@ void TestRunner::resolveRun() const {
   printer->println(" seconds.");
 
   printer->print(F("TestRunner summary: "));
-  printer->print(mPassedCount);
-  printer->print(F(" passed, "));
-  printer->print(mFailedCount);
-  printer->print(F(" failed, "));
+
+  if(useColour && mFailedCount == 0 && mExpiredCount == 0){
+    if(mSkippedCount) { printColourYellow(printer); } else { printColourGreen(printer); }
+    printer->print(mPassedCount);
+  	printer->print(F(" passed, "));
+    printColourOff(printer);
+  } else {
+    printer->print(mPassedCount);
+    printer->print(F(" passed, "));
+  }
+
+  if(useColour && mFailedCount){
+    printColourRed(printer);
+    printer->print(mFailedCount);
+    printer->print(F(" failed, "));
+    printColourOff(printer);
+  } else {
+    printer->print(mFailedCount);
+    printer->print(F(" failed, "));
+  }
+
+  if(useColour && mSkippedCount){
+    printColourYellow(printer);
+    printer->print(mSkippedCount);
+    printer->print(F(" skipped, "));
+    printColourOff(printer);
+  } else {
   printer->print(mSkippedCount);
   printer->print(F(" skipped, "));
-  printer->print(mExpiredCount);
-  printer->print(F(" timed out, out of "));
+  }
+
+  if(useColour && mExpiredCount){
+    printColourRed(printer);
+    printer->print(mExpiredCount);
+    printer->print(F(" timed out,"));
+    printColourOff(printer);
+  } else {
+    printer->print(mExpiredCount);
+    printer->print(F(" timed out,"));
+  }
+  printer->print(F(" out of "));
   printer->print(mCount);
   printer->println(F(" test(s)."));
-}
+
+  gFailedOrExpiredTestCount = mFailedCount + mExpiredCount;
+  gAllDone = true;}
 
 void TestRunner::setRunnerTimeout(TimeoutType timeout) {
   mTimeout = timeout;
