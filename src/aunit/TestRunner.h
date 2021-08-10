@@ -45,7 +45,7 @@ namespace aunit {
  * summary of the entire run at the end. In the future, it may be possible to
  * allow a different TestRunner to be used.
  */
-class TestRunner {
+class TestRunner : public ITestCaller {
   public:
     /**
      * Integer type of the timeout parameter. Seconds. Default is
@@ -54,8 +54,8 @@ class TestRunner {
     typedef uint16_t TimeoutType;
 
     /** Run all tests using the current runner. */
-    static void run() {
-      getRunner()->runTest();
+    static void run(bool useColour) {
+      getRunner()->runTest(useColour);
     }
 
     /** Print out the known tests. For debugging only. */
@@ -125,6 +125,15 @@ class TestRunner {
       getRunner()->setRunnerTimeout(seconds);
     }
 
+    static bool gAllDone;
+    static int gFailedOrExpiredTestCount;
+
+    // ITestCaller
+    virtual uint16_t getCount() const { return mCount; }
+    virtual uint16_t getPassedCount() const { return mPassedCount; }
+    virtual uint16_t getFailedCount() const { return mFailedCount; }
+    virtual uint16_t getSkippedCount() const { return mSkippedCount; }
+    virtual uint16_t getExpiredCount() const { return mExpiredCount; }
   private:
     /** Default total timeout for the test runner. */
     static const TimeoutType kTimeoutDefault = 10;
@@ -153,7 +162,7 @@ class TestRunner {
      * being pulled in unnecessarily, causing an 800 byte increase in flash size
      * on AVR platforms. See the docstring for setupRunner().
      */
-    void runTest() {
+    void runTest(bool useColour) {
       setupRunner();
 
       // Print initial header if this is the first run.
@@ -287,7 +296,7 @@ class TestRunner {
     void printStartRunner() const;
 
     /** Print out the summary of the entire test suite. */
-    void resolveRun() const;
+    void resolveRun(bool useColour) const;
 
     /**
      * Perform TestRunner initialization. The default Printer::getPrinter()

@@ -34,6 +34,20 @@ SOFTWARE.
 
 namespace aunit {
 
+class ITestCaller{
+  public:
+    virtual uint16_t getCount() const = 0;
+    virtual uint16_t getPassedCount() const = 0;
+    virtual uint16_t getFailedCount() const = 0;
+    virtual uint16_t getSkippedCount() const = 0;
+    virtual uint16_t getExpiredCount() const = 0;
+};
+
+void printColourRed(Print* printer);
+void printColourYellow(Print* printer);
+void printColourGreen(Print* printer);
+void printColourOff(Print* printer);
+
 /**
  * Base class of all test cases. The test() and testing() macros define
  * subclasses of Test or TestOnce (respectively), and allow the code following
@@ -112,7 +126,7 @@ class Test {
      * fixes the C++ static initialization problem making it safe to use this in
      * other static contexts.
      */
-    static Test** getRoot();
+    static Test** getRoot(const ITestCaller* pTestCaller);
 
     /** Empty constructor. The name will be set later. */
     Test();
@@ -152,7 +166,7 @@ class Test {
     virtual void loop() = 0;
 
     /** Print out the summary of the current test. */
-    void resolve();
+    void resolve(bool useColour);
 
     /** Get the name of the test. */
     const internal::FCString& getName() const { return mName; }
@@ -290,6 +304,8 @@ class Test {
     uint8_t mStatus;
     uint8_t mVerbosity;
     Test* mNext;
+
+    static const ITestCaller* mTestCaller;
 };
 
 }
