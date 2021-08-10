@@ -276,5 +276,5 @@ void setup() {
 }
 
 void loop() {
-  TestRunner::run();
+  TestRunner::run(false);
 }

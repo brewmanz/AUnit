@@ -41,7 +41,7 @@ class CustomOnce: public TestOnce {
     getName().println(printer);
     TestOnce::teardown();
   }
-    
+
 };
 
 // Verify that no matter how the test ends, the teardown() gets called.
@@ -65,7 +65,7 @@ class CustomAgain: public TestAgain {
     getName().println(printer);
     TestAgain::teardown();
   }
-    
+
 };
 
 // Verify that if the test executes, setup() and teardown() get called.
@@ -99,5 +99,5 @@ void setup() {
 }
 
 void loop() {
-  TestRunner::run();
+  TestRunner::run(false);
 }

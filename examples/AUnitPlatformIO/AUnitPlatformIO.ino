@@ -22,5 +22,5 @@ void setup() {
 }
 
 void loop() {
-  aunit::TestRunner::run();
+  aunit::TestRunner::run(false);
 }
