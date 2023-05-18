@@ -106,7 +106,7 @@ void TestRunner::setLifeCycleMatchingSubstring(
   }
   hasBeenFiltered = true;
 
-  for (Test** p = Test::getRoot(); *p != nullptr; p = (*p)->getNext()) {
+  for (Test** p = Test::getRoot(this); *p != nullptr; p = (*p)->getNext()) {
     if ((*p)->getName().hasSubstring(substring)) {
       (*p)->setLifeCycle(lifeCycle);
     }
@@ -114,7 +114,7 @@ void TestRunner::setLifeCycleMatchingSubstring(
 }
 
 void TestRunner::excludeAll() {
-  for (Test** p = Test::getRoot(); *p != nullptr; p = (*p)->getNext()) {
+  for (Test** p = Test::getRoot(this); *p != nullptr; p = (*p)->getNext()) {
     (*p)->setLifeCycle(Test::kLifeCycleExcluded);
   }
 }
@@ -194,8 +194,8 @@ void TestRunner::resolveRun(bool useColour) const {
     printer->print(F(" skipped, "));
     printColourOff(printer);
   } else {
-  printer->print(mSkippedCount);
-  printer->print(F(" skipped, "));
+    printer->print(mSkippedCount);
+    printer->print(F(" skipped, "));
   }
 
   if(useColour && mExpiredCount){
@@ -217,6 +217,9 @@ void TestRunner::resolveRun(bool useColour) const {
 void TestRunner::setRunnerTimeout(TimeoutType timeout) {
   mTimeout = timeout;
 }
+
+bool TestRunner::gAllDone = false;
+int TestRunner::gFailedOrExpiredTestCount = 0;
 
 //----------------------------------------------------------------------------
 // Command line argument processing on EpoxyDuino
