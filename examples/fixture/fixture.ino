@@ -16,7 +16,7 @@ struct Record {
   const char* name;
   int value;
 };
-  
+
 // A container of Records.
 class Container {
   public:
@@ -109,5 +109,5 @@ void setup() {
 }
 
 void loop() {
-  TestRunner::run();
+  TestRunner::run(false);
 }
