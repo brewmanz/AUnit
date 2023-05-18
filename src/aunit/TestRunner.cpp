@@ -180,4 +180,6 @@ void TestRunner::setRunnerTimeout(TimeoutType timeout) {
   mTimeout = timeout;
 }
 
+bool TestRunner::gAllDone = false;
+int TestRunner::gFailedOrExpiredTestCount = 0;
 }

@@ -172,10 +172,10 @@ class TestRunner : public ITestCaller {
       }
 
       // If no more test cases, then print out summary of run.
-      if (*Test::getRoot() == nullptr) {
+      if (*Test::getRoot(this) == nullptr) {
         if (!mIsResolved) {
           mEndTime = millis();
-          resolveRun();
+          resolveRun(useColour);
           mIsResolved = true;
         #if EPOXY_DUINO
           exit((mFailedCount || mExpiredCount) ? 1 : 0);
@@ -187,7 +187,7 @@ class TestRunner : public ITestCaller {
       // If reached the end and there are still test cases left, start from the
       // beginning again.
       if (*mCurrent == nullptr) {
-        mCurrent = Test::getRoot();
+        mCurrent = Test::getRoot(this);
       }
 
       // Implement a finite state machine that calls the (*mCurrent)->setup() or
@@ -263,7 +263,7 @@ class TestRunner : public ITestCaller {
           (*mCurrent)->setLifeCycle(Test::kLifeCycleFinished);
           break;
         case Test::kLifeCycleFinished:
-          (*mCurrent)->resolve();
+          (*mCurrent)->resolve(useColour);
           // skip to the next one by taking current test out of the list
           *mCurrent = *(*mCurrent)->getNext();
           break;
@@ -284,7 +284,7 @@ class TestRunner : public ITestCaller {
       Print* printer = Printer::getPrinter();
       printer->print(F("TestRunner test count: "));
       printer->println(mCount);
-      for (Test** p = Test::getRoot(); (*p) != nullptr; p = (*p)->getNext()) {
+      for (Test** p = Test::getRoot(this); (*p) != nullptr; p = (*p)->getNext()) {
         printer->print(F("Test "));
         (*p)->getName().print(printer);
         printer->print(F("; lifeCycle: "));
@@ -362,7 +362,7 @@ class TestRunner : public ITestCaller {
 
       mIsSetup = true;
       mCount = countTests();
-      mCurrent = Test::getRoot();
+      mCurrent = Test::getRoot(this);
       mStartTime = millis();
     }
 
