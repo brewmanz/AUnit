@@ -365,10 +365,10 @@ void loop() {
   // Should get something like:
   // TestRunner summary:
   //    10 passed, 0 failed, 2 skipped, 0 timed out, out of 12 test(s).
-  TestRunner::run();
+  TestRunner::run(false);
 #else
   // Should get something like:
   // Test summary: 6 passed, 1 failed, and 1 skipped, out of 8 test(s).
-  Test::run();
+  Test::run(false);
 #endif
 }

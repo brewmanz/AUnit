@@ -588,10 +588,10 @@ void loop() {
   // Should get something like:
   // TestRunner summary:
   //    21 passed, 0 failed, 0 skipped, 0 timed out, out of 23 test(s).
-  TestRunner::run();
+  TestRunner::run(false);
 #else
   // Should get something like:
   // Test summary: 12 passed, 0 failed, and 0 skipped, out of 12 test(s).
-  Test::run();
+  Test::run(false);
 #endif
 }
