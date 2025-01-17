@@ -31,6 +31,9 @@ SOFTWARE.
 
 namespace aunit {
 
+void printColourWhiteBold(Print* printer){
+  printer->print(F("\e[1;39m"));
+}
 void printColourRed(Print* printer){
   printer->print(F("\e[1;31m"));
 }
@@ -94,6 +97,7 @@ void Test::resolve(bool useColour) {
   Print* printer = Printer::getPrinter();
   if (mStatus == Test::kStatusPassed
       && isVerbosity(Verbosity::kTestPassed)) {
+    if(useColour){ printColourWhiteBold(printer); }
     printer->print(TEST_STRING);
     mName.print(printer);
     if(useColour){ printColourGreen(printer); }
@@ -101,6 +105,7 @@ void Test::resolve(bool useColour) {
     if(useColour){ printColourOff(printer); }
   } else if (mStatus == Test::kStatusFailed
       && isVerbosity(Verbosity::kTestFailed)) {
+    if(useColour){ printColourWhiteBold(printer); }
     printer->print(TEST_STRING);
     mName.print(printer);
     if(useColour){ printColourRed(printer); }
@@ -109,6 +114,7 @@ void Test::resolve(bool useColour) {
     if(useColour){ printColourOff(printer); }
   } else if (mStatus == Test::kStatusSkipped
       && isVerbosity(Verbosity::kTestSkipped)) {
+    if(useColour){ printColourWhiteBold(printer); }
     printer->print(TEST_STRING);
     mName.print(printer);
     if(useColour){ printColourYellow(printer); }
@@ -116,6 +122,7 @@ void Test::resolve(bool useColour) {
     if(useColour){ printColourOff(printer); }
   } else if (mStatus == Test::kStatusExpired
       && isVerbosity(Verbosity::kTestExpired)) {
+    if(useColour){ printColourWhiteBold(printer); }
     printer->print(TEST_STRING);
     mName.print(printer);
     if(useColour){ printColourRed(printer); }
