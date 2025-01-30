@@ -37,6 +37,15 @@ SOFTWARE.
 #define SERIAL_PORT_MONITOR Serial
 #endif
 
+#if 0 // add usage of colour option ... or not
+#elif defined(EPOXY_DUINO)
+  #define USE_COLOUR_OPTION true
+#elif defined(ARDUINO)
+  #define USE_COLOUR_OPTION false // added colour option
+#else
+  #define USE_COLOUR_OPTION false
+#endif
+
 namespace aunit {
 
 /**
@@ -54,7 +63,7 @@ class TestRunner : public ITestCaller {
     typedef uint16_t TimeoutType;
 
     /** Run all tests using the current runner. */
-    static void run(bool useColour) {
+    static void run(bool useColour = USE_COLOUR_OPTION) {
       getRunner()->runTest(useColour);
     }
 
