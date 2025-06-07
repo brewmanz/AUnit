@@ -34,13 +34,19 @@ SOFTWARE.
 
 namespace aunit {
 
-class ITestCaller{
-  public:
-    virtual uint16_t getCount() const = 0;
-    virtual uint16_t getPassedCount() const = 0;
-    virtual uint16_t getFailedCount() const = 0;
-    virtual uint16_t getSkippedCount() const = 0;
-    virtual uint16_t getExpiredCount() const = 0;
+class TestCallerBase{
+public:
+  uint16_t getCount() const { return mCount; }
+  uint16_t getPassedCount() const { return mPassedCount; }
+  uint16_t getFailedCount() const { return mFailedCount; }
+  uint16_t getSkippedCount() const { return mSkippedCount; }
+  uint16_t getExpiredCount() const { return mExpiredCount; }
+protected:
+  uint16_t mCount = 0;
+  uint16_t mPassedCount = 0;
+  uint16_t mFailedCount = 0;
+  uint16_t mSkippedCount = 0;
+  uint16_t mExpiredCount = 0;
 };
 
 void printColourRed(Print* printer);
@@ -126,7 +132,7 @@ class Test {
      * fixes the C++ static initialization problem making it safe to use this in
      * other static contexts.
      */
-    static Test** getRoot(const ITestCaller* pTestCaller);
+    static Test** getRoot(const TestCallerBase* pTestCaller);
 
     /** Empty constructor. The name will be set later. */
     Test();
@@ -305,7 +311,7 @@ class Test {
     uint8_t mVerbosity;
     Test* mNext;
 
-    static const ITestCaller* mTestCaller;
+    static const TestCallerBase* mTestCaller;
 };
 
 }

@@ -54,7 +54,7 @@ namespace aunit {
  * summary of the entire run at the end. In the future, it may be possible to
  * allow a different TestRunner to be used.
  */
-class TestRunner : public ITestCaller {
+class TestRunner : public TestCallerBase {
   public:
     /**
      * Integer type of the timeout parameter. Seconds. Default is
@@ -149,12 +149,6 @@ class TestRunner : public ITestCaller {
     static bool gAllDone;
     static int gFailedOrExpiredTestCount;
 
-    // ITestCaller
-    virtual uint16_t getCount() const { return mCount; }
-    virtual uint16_t getPassedCount() const { return mPassedCount; }
-    virtual uint16_t getFailedCount() const { return mFailedCount; }
-    virtual uint16_t getSkippedCount() const { return mSkippedCount; }
-    virtual uint16_t getExpiredCount() const { return mExpiredCount; }
   private:
     /** Default total timeout for the test runner. */
     static const TimeoutType kTimeoutDefault = 10;
@@ -451,11 +445,6 @@ class TestRunner : public ITestCaller {
     uint8_t mVerbosity = Verbosity::kDefault;
     // True if any include(), exclude(), includesub(), excludesub() was invoked.
     bool hasBeenFiltered = false;
-    uint16_t mCount = 0;
-    uint16_t mPassedCount = 0;
-    uint16_t mFailedCount = 0;
-    uint16_t mSkippedCount = 0;
-    uint16_t mExpiredCount = 0;
     uint16_t mStatusErrorCount = 0;
     TimeoutType mTimeout = kTimeoutDefault;
     unsigned long mStartTime;

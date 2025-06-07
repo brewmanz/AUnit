@@ -49,7 +49,7 @@ void printColourOff(Print* printer){
 
 // Use a static variable inside a function to solve the static initialization
 // ordering problem.
-Test** Test::getRoot(const ITestCaller* pTestCaller) {
+Test** Test::getRoot(const TestCallerBase* pTestCaller) {
   static Test* root;
   if(pTestCaller){
     mTestCaller = pTestCaller;
@@ -131,6 +131,6 @@ void Test::resolve(bool useColour) {
   }
 }
 
-const ITestCaller* Test::mTestCaller = nullptr;
+const TestCallerBase* Test::mTestCaller = nullptr;
 
 }
