@@ -1,11 +1,15 @@
 PASSING_TESTS := AUnitMetaTest \
 AUnitMoreTest \
 AUnitTest \
+CompareTest \
 FilterTest \
 Print64Test
 
 FAILING_TESTS := FailingTest \
 SetupAndTeardownTest
+
+TEXT_BOLD := $(shell tput bold)
+TEXT_PLAIN:= $(shell tput sgr0)
 
 tests:
 	set -e; \
@@ -17,7 +21,7 @@ tests:
 runtests:
 	set -e; \
 	for dir in $(PASSING_TESTS); do \
-		echo '==== Running:' $$dir; \
+		echo '$(TEXT_BOLD)==== Running:' $$dir '$(TEXT_PLAIN)'; \
 		$(MAKE) -C $$dir run; \
 	done
 
@@ -26,7 +30,7 @@ runtests:
 # $ make run_manual_tests
 runfailingtests:
 	for dir in $(FAILING_TESTS); do \
-		echo '==== Running:' $$dir; \
+		echo '$(TEXT_BOLD)==== Running:' $$dir '$(TEXT_PLAIN)'; \
 		$(MAKE) -C $$dir run; \
 	done
 

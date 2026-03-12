@@ -99,5 +99,5 @@ void setup() {
 }
 
 void loop() {
-  TestRunner::run(false);
+  TestRunner::run();
 }

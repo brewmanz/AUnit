@@ -178,5 +178,5 @@ void loop() {
   //
   // Verify that excluded tests do not execute setup() and teardown(). They
   // go directly into the final Skipped state.
-  TestRunner::run(false);
+  TestRunner::run();
 }
